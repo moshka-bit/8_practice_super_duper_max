@@ -1,0 +1,6 @@
+@_8_practice_super_duper_max_HostAddress = http://localhost:5011
+
+GET {{_8_practice_super_duper_max_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
