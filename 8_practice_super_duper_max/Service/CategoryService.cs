@@ -40,6 +40,7 @@ namespace _8_practice_super_duper_max.Service
             }
 
             _context.Categories.Remove(existing_category);
+
             await _context.SaveChangesAsync();
 
             return new OkObjectResult(new

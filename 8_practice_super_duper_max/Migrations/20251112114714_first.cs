@@ -12,6 +12,20 @@ namespace _8_practice_super_duper_max.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "ActionTypes",
+                columns: table => new
+                {
+                    action_type_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    action_name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    action_description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ActionTypes", x => x.action_type_id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Categories",
                 columns: table => new
                 {
@@ -148,6 +162,33 @@ namespace _8_practice_super_duper_max.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "LogUserActions",
+                columns: table => new
+                {
+                    log_user_action_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    created_at = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    user_id = table.Column<int>(type: "int", nullable: false),
+                    action_type_id = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LogUserActions", x => x.log_user_action_id);
+                    table.ForeignKey(
+                        name: "FK_LogUserActions_ActionTypes_action_type_id",
+                        column: x => x.action_type_id,
+                        principalTable: "ActionTypes",
+                        principalColumn: "action_type_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LogUserActions_Users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "Users",
+                        principalColumn: "user_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Orders",
                 columns: table => new
                 {
@@ -216,7 +257,6 @@ namespace _8_practice_super_duper_max.Migrations
                 {
                     basket_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    products_count = table.Column<int>(type: "int", nullable: false),
                     result_price = table.Column<double>(type: "float", nullable: false),
                     user_id = table.Column<int>(type: "int", nullable: false),
                     order_id = table.Column<int>(type: "int", nullable: false)
@@ -244,6 +284,7 @@ namespace _8_practice_super_duper_max.Migrations
                 {
                     basket_items_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    quantity = table.Column<int>(type: "int", nullable: false),
                     basket_id = table.Column<int>(type: "int", nullable: false),
                     product_id = table.Column<int>(type: "int", nullable: false)
                 },
@@ -287,6 +328,16 @@ namespace _8_practice_super_duper_max.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Logins_user_id",
                 table: "Logins",
+                column: "user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LogUserActions_action_type_id",
+                table: "LogUserActions",
+                column: "action_type_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LogUserActions_user_id",
+                table: "LogUserActions",
                 column: "user_id");
 
             migrationBuilder.CreateIndex(
@@ -335,6 +386,9 @@ namespace _8_practice_super_duper_max.Migrations
                 name: "Logins");
 
             migrationBuilder.DropTable(
+                name: "LogUserActions");
+
+            migrationBuilder.DropTable(
                 name: "Sessions");
 
             migrationBuilder.DropTable(
@@ -342,6 +396,9 @@ namespace _8_practice_super_duper_max.Migrations
 
             migrationBuilder.DropTable(
                 name: "Products");
+
+            migrationBuilder.DropTable(
+                name: "ActionTypes");
 
             migrationBuilder.DropTable(
                 name: "Orders");

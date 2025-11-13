@@ -1,4 +1,5 @@
-﻿using _8_practice_super_duper_max.Interfaces;
+﻿using _8_practice_super_duper_max.CustomAttributes;
+using _8_practice_super_duper_max.Interfaces;
 using _8_practice_super_duper_max.Requests;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,6 +16,7 @@ namespace _8_practice_super_duper_max.Controllers
 
         [HttpGet]
         [Route("GetAllCategories")]
+        [RoleAuthorized([1])]
         public async Task<IActionResult> GetAllCategoriesAsync()
         {
             return await _Service1.GetAllCategoriesAsync();
@@ -22,6 +24,7 @@ namespace _8_practice_super_duper_max.Controllers
 
         [HttpPost]
         [Route("PostNewCategory")]
+        [RoleAuthorized([1])]
         public async Task<IActionResult> PostNewCategoryAsync(PostNewCategory postNewCategory)
         {
             return await _Service1.PostNewCategoryAsync(postNewCategory);
@@ -29,6 +32,7 @@ namespace _8_practice_super_duper_max.Controllers
 
         [HttpPut]
         [Route("PutCategory")]
+        [RoleAuthorized([1])]
         public async Task<IActionResult> PutCategoryAsync(int id, PutCategory putCategory)
         {
             return await _Service1.PutCategoryAsync(id, putCategory);
@@ -36,7 +40,7 @@ namespace _8_practice_super_duper_max.Controllers
 
         [HttpDelete]
         [Route("DeleteCategory")]
-
+        [RoleAuthorized([1])]
         public async Task<IActionResult> DeleteCategoryAsync(int id)
         {
             return await _Service1.DeleteCategoryAsync(id);

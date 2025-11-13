@@ -22,6 +22,27 @@ namespace _8_practice_super_duper_max.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("_8_practice_super_duper_max.Models.ActionType", b =>
+                {
+                    b.Property<int>("action_type_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("action_type_id"));
+
+                    b.Property<string>("action_description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("action_name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("action_type_id");
+
+                    b.ToTable("ActionTypes");
+                });
+
             modelBuilder.Entity("_8_practice_super_duper_max.Models.Basket", b =>
                 {
                     b.Property<int>("basket_id")
@@ -31,9 +52,6 @@ namespace _8_practice_super_duper_max.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("basket_id"));
 
                     b.Property<int>("order_id")
-                        .HasColumnType("int");
-
-                    b.Property<int>("products_count")
                         .HasColumnType("int");
 
                     b.Property<double>("result_price")
@@ -63,6 +81,9 @@ namespace _8_practice_super_duper_max.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("product_id")
+                        .HasColumnType("int");
+
+                    b.Property<int>("quantity")
                         .HasColumnType("int");
 
                     b.HasKey("basket_items_id");
@@ -106,6 +127,32 @@ namespace _8_practice_super_duper_max.Migrations
                     b.HasKey("delivery_type_id");
 
                     b.ToTable("DeliveryTypes");
+                });
+
+            modelBuilder.Entity("_8_practice_super_duper_max.Models.LogUserAction", b =>
+                {
+                    b.Property<int>("log_user_action_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("log_user_action_id"));
+
+                    b.Property<int>("action_type_id")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("created_at")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("user_id")
+                        .HasColumnType("int");
+
+                    b.HasKey("log_user_action_id");
+
+                    b.HasIndex("action_type_id");
+
+                    b.HasIndex("user_id");
+
+                    b.ToTable("LogUserActions");
                 });
 
             modelBuilder.Entity("_8_practice_super_duper_max.Models.Login", b =>
@@ -364,6 +411,25 @@ namespace _8_practice_super_duper_max.Migrations
                     b.Navigation("Basket");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("_8_practice_super_duper_max.Models.LogUserAction", b =>
+                {
+                    b.HasOne("_8_practice_super_duper_max.Models.ActionType", "ActionType")
+                        .WithMany()
+                        .HasForeignKey("action_type_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("_8_practice_super_duper_max.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("user_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ActionType");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("_8_practice_super_duper_max.Models.Login", b =>

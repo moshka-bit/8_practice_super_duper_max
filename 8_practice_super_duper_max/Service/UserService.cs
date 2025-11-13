@@ -2,6 +2,7 @@
 using _8_practice_super_duper_max.Interfaces;
 using _8_practice_super_duper_max.Models;
 using _8_practice_super_duper_max.Requests;
+using _8_practice_super_duper_max.UniversalMethods;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static System.Reflection.Metadata.BlobBuilder;
@@ -11,13 +12,44 @@ namespace _8_practice_super_duper_max.Service
     public class UserService : IUserService
     {
         private readonly ContextDb _context;
+        private readonly JwtGenerator _jwtGenerator;
 
-        public UserService(ContextDb context)
+        public UserService(ContextDb context, JwtGenerator jwtGenerator)
         {
             _context = context;
+            _jwtGenerator = jwtGenerator;
         }
 
-        // удаление покупателя
+        public async Task<IActionResult> AuthUserAsync(AuthUserModel loginData)
+        {
+            var user = _context.Logins.Include(u => u.User).FirstOrDefault(l => l.login_name == loginData.login_name && l.password == loginData.password);
+
+            if (user == null) return new OkObjectResult(new
+            {
+                Success = false
+            });
+
+            string token = _jwtGenerator.GenerateToken(new LoginPassword()
+            {
+                user_id = user.user_id,
+                role_id = user.User.role_id
+            });
+
+            _context.Sessions.Add(new Session
+            {
+                token = token,
+                user_id = user.user_id
+            });
+            _context.SaveChanges();
+
+            return new OkObjectResult(new
+            {
+                status = true,
+                token
+            });
+        }
+
+        //удаление покупателя
         public async Task<IActionResult> DeleteCustomerAsync(int id)
         {
             if (id == 0)
@@ -125,6 +157,122 @@ namespace _8_practice_super_duper_max.Service
             return new OkObjectResult(new
             {
                 data = new { employees = employees },
+                status = true
+            });
+        }
+
+        // регистрация нового покупателя
+        public async Task<IActionResult> PostNewCustomerAsync(PostNewCustomer postNewCustomer)
+        {
+            if (string.IsNullOrEmpty(postNewCustomer.user_fullname))
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = false,
+                    message = "Фамилия и имя не могут быть пустыми"
+                });
+            }
+
+            if (string.IsNullOrEmpty(postNewCustomer.email))
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = false,
+                    message = "Почта не может быть пустой"
+                });
+            }
+
+            if (string.IsNullOrEmpty(postNewCustomer.address))
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = false,
+                    message = "Адрес не может быть пустым"
+                });
+            }
+
+            if (string.IsNullOrEmpty(postNewCustomer.phonenumber))
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = false,
+                    message = "Номер телефона не может быть пустым"
+                });
+            }
+
+            if (string.IsNullOrEmpty(postNewCustomer.login_name))
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = false,
+                    message = "Логин не может быть пустым"
+                });
+            }
+
+            if (string.IsNullOrEmpty(postNewCustomer.password))
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = false,
+                    message = "Пароль не может быть пустым"
+                });
+            }
+
+            var the_same_email = await _context.Users.FirstOrDefaultAsync(u => u.email.ToLower() == postNewCustomer.email.ToLower());
+
+            if (the_same_email != null)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = false,
+                    message = "Пользователь с таким email уже существует"
+                });
+            }
+
+            var the_same_phone = await _context.Users.FirstOrDefaultAsync(u => u.phonenumber.ToLower() == postNewCustomer.phonenumber.ToLower());
+
+            if (the_same_phone != null)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = false,
+                    message = "Пользователь с таким номером телефона уже существует"
+                });
+            }
+
+            var the_same_login = await _context.Logins.FirstOrDefaultAsync(l => l.login_name.ToLower() == postNewCustomer.login_name.ToLower());
+
+            if (the_same_login != null)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = false,
+                    message = "Пользователь с таким логином уже существует"
+                });
+            }
+
+            var login = new Login()
+            {
+                User = new User()
+                {
+                    user_fullname = postNewCustomer.user_fullname,
+                    email = postNewCustomer.email,
+                    address = postNewCustomer.address,
+                    phonenumber = postNewCustomer.phonenumber,
+                    CreatedAt = DateOnly.FromDateTime(DateTime.Now),
+                    UpdatedAt = DateOnly.FromDateTime(DateTime.Now),
+                    role_id = 2
+
+                },
+                password = postNewCustomer.password,
+                login_name = postNewCustomer.login_name
+            };
+
+            await _context.AddAsync(login);
+            await _context.SaveChangesAsync();
+
+            return new OkObjectResult(new
+            {
                 status = true
             });
         }

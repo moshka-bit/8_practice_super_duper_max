@@ -1,6 +1,7 @@
 using _8_practice_super_duper_max.DatabaseContext;
 using _8_practice_super_duper_max.Interfaces;
 using _8_practice_super_duper_max.Service;
+using _8_practice_super_duper_max.UniversalMethods;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,7 +18,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
-
+builder.Services.AddSingleton<JwtGenerator>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

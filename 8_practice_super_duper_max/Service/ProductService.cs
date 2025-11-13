@@ -49,12 +49,112 @@ namespace _8_practice_super_duper_max.Service
             });
         }
 
-        // получить список всех продуктов
-        public async Task<IActionResult> GetAllProductsAsync()
+        // получение списка всех продуктов
+        public async Task<IActionResult> GetAllProductsAsync(
+            string filter_by_category,
+            string sort_by_price,
+            string sort_by_date,  // новый параметр для сортировки по дате
+            int min_price,
+            int max_price,
+            bool in_stock)
         {
-            var products = await _context.Products.ToListAsync();
+            List<Product> products;
 
-            if (products == null)
+            if (string.IsNullOrEmpty(filter_by_category))
+            {
+                products = await _context.Products
+                    .Include(p => p.Category)
+                    .ToListAsync();
+            }
+            else
+            {
+                products = await _context.Products
+                    .Include(p => p.Category)
+                    .Where(p => p.Category.category_name.Contains(filter_by_category))
+                    .ToListAsync();
+            }
+
+            if (min_price < 0)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = false,
+                    message = "Минимальная цена не может быть отрицательной"
+                });
+            }
+
+            if (max_price < 0)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = false,
+                    message = "Максимальная цена не может быть отрицательной"
+                });
+            }
+
+            if (max_price > 0 && min_price > max_price)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = false,
+                    message = "Минимальная цена не может быть больше максимальной"
+                });
+            }
+
+            if (min_price > 0)
+            {
+                products = products.Where(p => p.price >= min_price).ToList();
+            }
+
+            if (max_price > 0)
+            {
+                products = products.Where(p => p.price <= max_price).ToList();
+            }
+
+            if (in_stock == true)
+            {
+                // Только товары в наличии (stock > 0)
+                products = products.Where(p => p.stock > 0).ToList();
+            }
+            else
+            {
+                // Только товары не в наличии (stock == 0)
+                products = products.Where(p => p.stock == 0).ToList();
+            }
+
+            // Сначала применяем сортировку по дате (если указана)
+            if (!string.IsNullOrEmpty(sort_by_date))
+            {
+                if (sort_by_date.ToLower() == "desc")
+                {
+                    products = products.OrderByDescending(p => p.created_at).ToList();
+                }
+                else if (sort_by_date.ToLower() == "asc")
+                {
+                    products = products.OrderBy(p => p.created_at).ToList();
+                }
+            }
+
+            // Затем применяем сортировку по цене (если указана)
+            if (!string.IsNullOrEmpty(sort_by_price))
+            {
+                if (sort_by_price.ToLower() == "desc")
+                {
+                    products = products.OrderByDescending(p => p.price).ToList();
+                }
+                else if (sort_by_price.ToLower() == "asc")
+                {
+                    products = products.OrderBy(p => p.price).ToList();
+                }
+            }
+
+            // Если не указана ни одна сортировка, сортируем по имени по умолчанию
+            if (string.IsNullOrEmpty(sort_by_date) && string.IsNullOrEmpty(sort_by_price))
+            {
+                products = products.OrderBy(p => p.product_name).ToList();
+            }
+
+            if (products.Count == 0)
             {
                 return new NotFoundObjectResult(new
                 {
@@ -69,6 +169,7 @@ namespace _8_practice_super_duper_max.Service
                 status = true
             });
         }
+
 
         // добавление нового продукта
         public async Task<IActionResult> PostNewProductAsync(PostNewProduct postNewPoduct)

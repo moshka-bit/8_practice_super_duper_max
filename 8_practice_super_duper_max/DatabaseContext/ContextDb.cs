@@ -21,5 +21,7 @@ namespace _8_practice_super_duper_max.DatabaseContext
         public DbSet<Session> Sessions { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Status> Statuses { get; set; }
+        public DbSet<LogUserAction> LogUserActions { get; set; }
+        public DbSet<ActionType> ActionTypes { get ; set; }
     }
 }

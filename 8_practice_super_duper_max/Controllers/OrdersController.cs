@@ -1,4 +1,5 @@
-﻿using _8_practice_super_duper_max.Interfaces;
+﻿using _8_practice_super_duper_max.CustomAttributes;
+using _8_practice_super_duper_max.Interfaces;
 using _8_practice_super_duper_max.Requests;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,6 +16,7 @@ namespace _8_practice_super_duper_max.Controllers
 
         [HttpGet]
         [Route("GetAllOrders")]
+        [RoleAuthorized([1, 3])]
         public async Task<IActionResult> GetAllOrdersAsync()
         {
             return await _Service1.GetAllOrdersAsync();
@@ -22,7 +24,7 @@ namespace _8_practice_super_duper_max.Controllers
 
         [HttpPut]
         [Route("PutOrderStatus")]
-
+        [RoleAuthorized([1, 3])]
         public async Task<IActionResult> PutOrderStatusAsync(int id, PutOrderStatus putOrderStatus)
         {
             return await _Service1.PutOrderStatusAsync(id, putOrderStatus);

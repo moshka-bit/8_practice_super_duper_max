@@ -13,5 +13,7 @@ namespace _8_practice_super_duper_max.Interfaces
         Task<IActionResult> PutCustomerAsync(int id, PutCustomer putCustomer);
         Task<IActionResult> DeleteCustomerAsync(int id);
         Task<IActionResult> PutUserRoleAsync(int id, PutUserRole putUserRole);
+        Task<IActionResult> PostNewCustomerAsync(PostNewCustomer postNewCustomer);
+        Task<IActionResult> AuthUserAsync(AuthUserModel loginData);
     }
 }
