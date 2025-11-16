@@ -25,10 +25,15 @@ namespace _8_practice_super_duper_max.Service
         {
             var user = _context.Logins.Include(u => u.User).FirstOrDefault(l => l.login_name == loginData.login_name && l.password == loginData.password);
 
-            if (user == null) return new OkObjectResult(new
+            if (user == null)
             {
-                status = false
-            });
+                return new NotFoundObjectResult(new
+                {
+                    status = false,
+                    message = "Нет такого пользователя"
+                });
+            }
+            ;
 
             string token = _jwtGenerator.GenerateToken(new LoginPassword()
             {

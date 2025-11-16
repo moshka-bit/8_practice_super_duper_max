@@ -16,7 +16,7 @@ namespace _8_practice_super_duper_max.Controllers
 
         [HttpGet]
         [Route("GetAllEmployees")]
-        /[RoleAuthorized([1])]
+        [RoleAuthorized([1])]
         public async Task<IActionResult> GetAllEmployeesAsync()
         {
             return await _Service1.GetAllEmployeesAsync();

@@ -16,6 +16,7 @@ namespace _8_practice_super_duper_max.Controllers
 
         [HttpGet]
         [Route("GetAllProducts")]
+        [RoleAuthorized([1, 2, 3])]
         public async Task<IActionResult> GetAllProductsAsync(string filter_by_category, string sort_by_price, string sort_by_date ,int min_price, int max_price, bool in_stock)
         {
             return await _Service1.GetAllProductsAsync(filter_by_category, sort_by_price, sort_by_date, min_price, max_price, in_stock);
