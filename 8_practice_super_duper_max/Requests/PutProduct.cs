@@ -8,5 +8,6 @@
         public bool is_active { get; set; }
         public int stock { get; set; }
         public int category_id { get; set; }
+        public int user_id { get; set; }
     }
 }

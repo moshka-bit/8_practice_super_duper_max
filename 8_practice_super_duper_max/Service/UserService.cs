@@ -20,13 +20,14 @@ namespace _8_practice_super_duper_max.Service
             _jwtGenerator = jwtGenerator;
         }
 
+        // авторизация пользователя
         public async Task<IActionResult> AuthUserAsync(AuthUserModel loginData)
         {
             var user = _context.Logins.Include(u => u.User).FirstOrDefault(l => l.login_name == loginData.login_name && l.password == loginData.password);
 
             if (user == null) return new OkObjectResult(new
             {
-                Success = false
+                status = false
             });
 
             string token = _jwtGenerator.GenerateToken(new LoginPassword()
@@ -39,6 +40,13 @@ namespace _8_practice_super_duper_max.Service
             {
                 token = token,
                 user_id = user.user_id
+            });
+
+            _context.LogUserActions.Add(new LogUserAction()
+            {
+                created_at = DateTime.Now,
+                user_id = user.user_id,
+                action_type_id = 1 // USER_LOGIN
             });
             _context.SaveChanges();
 
@@ -268,8 +276,20 @@ namespace _8_practice_super_duper_max.Service
                 login_name = postNewCustomer.login_name
             };
 
+
             await _context.AddAsync(login);
             await _context.SaveChangesAsync();
+
+            var log = new LogUserAction()
+            {
+                created_at = DateTime.Now,
+                user_id = login.User.user_id,
+                action_type_id = 2 // USER_REGISTERED
+            };
+
+            await _context.AddAsync(log);
+            await _context.SaveChangesAsync();
+
 
             return new OkObjectResult(new
             {
@@ -393,7 +413,7 @@ namespace _8_practice_super_duper_max.Service
             });
         }
 
-        // изменение покупателя
+        // изменение покупателя админом
         public async Task<IActionResult> PutCustomerAsync(int id, PutCustomer putCustomer)
         {
             if (id == 0)
@@ -583,24 +603,44 @@ namespace _8_practice_super_duper_max.Service
             });
         }
 
-        // изменение инфы о пользователе
-        public async Task<IActionResult> PutUserAsync(PutUser putUser)
+        // изменение пользователя пользователем
+        public async Task<IActionResult> PutUserAsync(int id, PutUser putUser)
         {
+            if (id == 0)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = false,
+                    message = "Проблемы с Id"
+                });
+            }
+
+            var existingCustomer = await _context.Users.FirstOrDefaultAsync(b => b.user_id == id);
+
+            if (existingCustomer == null)
+            {
+                return new NotFoundObjectResult(new
+                {
+                    status = false,
+                    message = "Нет такого пользователя с таким id"
+                });
+            }
+
+            if (string.IsNullOrEmpty(putUser.user_fullname))
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = false,
+                    message = "Фамилия и имя не могут быть пустыми"
+                });
+            }
+
             if (string.IsNullOrEmpty(putUser.email))
             {
                 return new BadRequestObjectResult(new
                 {
                     status = false,
                     message = "Почта не может быть пустой"
-                });
-            }
-
-            if (string.IsNullOrEmpty(putUser.address))
-            {
-                return new BadRequestObjectResult(new
-                {
-                    status = false,
-                    message = "Адрес не может быть пустым"
                 });
             }
 
@@ -621,6 +661,30 @@ namespace _8_practice_super_duper_max.Service
                     message = "Пароль не может быть пустым"
                 });
             }
+
+            var our_login = await _context.Logins.FirstOrDefaultAsync(l => l.user_id == id);
+
+            existingCustomer.user_fullname = putUser.user_fullname;
+            existingCustomer.email = putUser.email;
+            existingCustomer.phonenumber = putUser.phonenumber;
+            existingCustomer.UpdatedAt = DateOnly.FromDateTime(DateTime.Now);
+            our_login.password = putUser.password;
+
+
+            var log = new LogUserAction()
+            {
+                created_at = DateTime.Now,
+                user_id = id,
+                action_type_id = 3 // PROFILE_UPDATED
+            };
+
+            await _context.AddAsync(log);
+            await _context.SaveChangesAsync();
+
+            return new OkObjectResult(new
+            {
+                status = true
+            });
         }
 
         // изменение роли пользователя
@@ -668,6 +732,13 @@ namespace _8_practice_super_duper_max.Service
 
             existingUser.role_id = putUserRole.role_id;
 
+            var log = new LogUserAction()
+            {
+                created_at = DateTime.Now,
+                user_id = putUserRole.user_id,
+                action_type_id = 16 // USER_ROLE_CHANGED
+            };
+            await _context.AddAsync(log);
             await _context.SaveChangesAsync();
 
             return new OkObjectResult(new

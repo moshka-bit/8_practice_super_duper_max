@@ -41,9 +41,9 @@ namespace _8_practice_super_duper_max.Controllers
         [HttpDelete]
         [Route("DeleteCategory")]
         [RoleAuthorized([1])]
-        public async Task<IActionResult> DeleteCategoryAsync(int id)
+        public async Task<IActionResult> DeleteCategoryAsync(int id, int user_id)
         {
-            return await _Service1.DeleteCategoryAsync(id);
+            return await _Service1.DeleteCategoryAsync(id, user_id);
         }
     }
 }

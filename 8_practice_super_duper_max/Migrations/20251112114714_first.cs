@@ -185,7 +185,7 @@ namespace _8_practice_super_duper_max.Migrations
                         column: x => x.user_id,
                         principalTable: "Users",
                         principalColumn: "user_id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateTable(

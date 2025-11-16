@@ -8,6 +8,6 @@ namespace _8_practice_super_duper_max.Interfaces
         Task<IActionResult> GetAllCategoriesAsync();
         Task<IActionResult> PostNewCategoryAsync(PostNewCategory postNewCategory);
         Task<IActionResult> PutCategoryAsync(int id, PutCategory putCategory);
-        Task<IActionResult> DeleteCategoryAsync(int id);
+        Task<IActionResult> DeleteCategoryAsync(int id, int user_id);
     }
 }

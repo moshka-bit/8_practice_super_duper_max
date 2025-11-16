@@ -3,5 +3,6 @@
     public class PutOrderStatus
     {
         public int status_id { get; set; }
+        public int user_id { get; set; }
     }
 }

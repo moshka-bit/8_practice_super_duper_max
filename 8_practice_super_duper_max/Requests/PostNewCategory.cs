@@ -3,5 +3,6 @@
     public class PostNewCategory
     {
         public string category_name { get; set; }
+        public int user_id { get; set; }
     }
 }

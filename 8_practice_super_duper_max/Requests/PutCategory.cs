@@ -3,7 +3,7 @@
     public class PutCategory
     {
         public string category_name { get; set; }
-
+        public int user_id { get; set; }
     }
 }
     

@@ -9,7 +9,6 @@ namespace _8_practice_super_duper_max.Models
         public int order_id { get; set; }
         public DateOnly order_date { get; set; }
         public double total_amount { get; set; }
-        public string delivery_adress { get; set; }
 
         [Required]
         [ForeignKey("Status")]

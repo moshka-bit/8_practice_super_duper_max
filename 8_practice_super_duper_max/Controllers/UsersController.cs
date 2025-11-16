@@ -16,7 +16,7 @@ namespace _8_practice_super_duper_max.Controllers
 
         [HttpGet]
         [Route("GetAllEmployees")]
-        [RoleAuthorized([1])]
+        /[RoleAuthorized([1])]
         public async Task<IActionResult> GetAllEmployeesAsync()
         {
             return await _Service1.GetAllEmployeesAsync();
@@ -90,6 +90,14 @@ namespace _8_practice_super_duper_max.Controllers
         public async Task<IActionResult> AuthUserAsync(AuthUserModel LoginData)
         {
             return await _Service1.AuthUserAsync(LoginData);
+        }
+
+        [HttpPut]
+        [Route("PutUser")]
+        [RoleAuthorized([1, 2, 3])]
+        public async Task<IActionResult> PutUserAsync(int id, PutUser putUser)
+        {
+            return await _Service1.PutUserAsync(id, putUser);
         }
     }
 }

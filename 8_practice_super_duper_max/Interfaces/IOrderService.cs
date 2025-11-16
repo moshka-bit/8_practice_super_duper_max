@@ -7,5 +7,10 @@ namespace _8_practice_super_duper_max.Interfaces
     {
         Task<IActionResult> GetAllOrdersAsync();
         Task<IActionResult> PutOrderStatusAsync(int id, PutOrderStatus putOrderStatus);
+        Task<IActionResult> PostNewOrderAsync(PostNewOrder postNewOrder);
+        Task<IActionResult> GetOrdersByUserIdAsync(int userId);
+        Task<IActionResult> PutOrderStatusWhenCancelledAsync(int order_id);
+        Task<IActionResult> DailyReportSalesAsync();
+        Task<IActionResult> WeeklyReportsSalesAsync();
     }
 }

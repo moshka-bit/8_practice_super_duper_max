@@ -17,7 +17,7 @@ namespace _8_practice_super_duper_max.Service
         }
 
         // удаление категории
-        public async Task<IActionResult> DeleteCategoryAsync(int id)
+        public async Task<IActionResult> DeleteCategoryAsync(int id, int user_id)
         {
             if (id == 0)
             {
@@ -41,6 +41,14 @@ namespace _8_practice_super_duper_max.Service
 
             _context.Categories.Remove(existing_category);
 
+            var log = new LogUserAction()
+            {
+                created_at = DateTime.Now,
+                user_id = user_id,
+                action_type_id = 21 // CATEGORY DELETED
+            };
+
+            await _context.AddAsync(log);
             await _context.SaveChangesAsync();
 
             return new OkObjectResult(new
@@ -98,6 +106,14 @@ namespace _8_practice_super_duper_max.Service
                 category_name = postNewCategory.category_name
             };
 
+            var log = new LogUserAction()
+            {
+                created_at = DateTime.Now,
+                user_id = postNewCategory.user_id,
+                action_type_id = 19 // CATEGORY_ADDED
+            };
+
+            await _context.AddAsync(log);
             await _context.AddAsync(category);
             await _context.SaveChangesAsync();
 
@@ -141,6 +157,14 @@ namespace _8_practice_super_duper_max.Service
 
             existingCategory.category_name = putCategory.category_name;
 
+            var log = new LogUserAction()
+            {
+                created_at = DateTime.Now,
+                user_id = putCategory.user_id,
+                action_type_id = 20 // CATEGORY CHANGED
+            };
+
+            await _context.AddAsync(log);
             await _context.SaveChangesAsync();
 
             return new OkObjectResult(new

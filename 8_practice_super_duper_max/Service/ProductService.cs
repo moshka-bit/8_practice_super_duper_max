@@ -18,9 +18,9 @@ namespace _8_practice_super_duper_max.Service
         }
 
         // удаление продукта
-        public async Task<IActionResult> DeleteProductAsync(int id)
+        public async Task<IActionResult> DeleteProductAsync(int product_id, int user_id)
         {
-            if (id == 0)
+            if (product_id == 0)
             {
                 return new BadRequestObjectResult(new
                 {
@@ -29,7 +29,7 @@ namespace _8_practice_super_duper_max.Service
                 });
             }
 
-            var existing_product = await _context.Products.FirstOrDefaultAsync(p => p.product_id == id);
+            var existing_product = await _context.Products.FirstOrDefaultAsync(p => p.product_id == product_id);
 
             if (existing_product == null)
             {
@@ -40,6 +40,14 @@ namespace _8_practice_super_duper_max.Service
                 });
             }
 
+            var log = new LogUserAction()
+            {
+                created_at = DateTime.Now,
+                user_id = user_id,
+                action_type_id = 14 // PRODUCT_DELETED
+            };
+
+            await _context.AddAsync(log);
             _context.Products.Remove(existing_product);
             await _context.SaveChangesAsync();
 
@@ -50,28 +58,18 @@ namespace _8_practice_super_duper_max.Service
         }
 
         // получение списка всех продуктов
-        public async Task<IActionResult> GetAllProductsAsync(
-            string filter_by_category,
-            string sort_by_price,
-            string sort_by_date,  // новый параметр для сортировки по дате
-            int min_price,
-            int max_price,
-            bool in_stock)
+        public async Task<IActionResult> GetAllProductsAsync(string filter_by_category, string sort_by_price, string sort_by_date, int min_price, int max_price, bool in_stock)
         {
             List<Product> products;
 
             if (string.IsNullOrEmpty(filter_by_category))
             {
-                products = await _context.Products
-                    .Include(p => p.Category)
+                products = await _context.Products.Include(p => p.Category)
                     .ToListAsync();
             }
             else
             {
-                products = await _context.Products
-                    .Include(p => p.Category)
-                    .Where(p => p.Category.category_name.Contains(filter_by_category))
-                    .ToListAsync();
+                products = await _context.Products.Include(p => p.Category).Where(p => p.Category.category_name.Contains(filter_by_category)).ToListAsync();
             }
 
             if (min_price < 0)
@@ -113,16 +111,13 @@ namespace _8_practice_super_duper_max.Service
 
             if (in_stock == true)
             {
-                // Только товары в наличии (stock > 0)
                 products = products.Where(p => p.stock > 0).ToList();
             }
             else
             {
-                // Только товары не в наличии (stock == 0)
                 products = products.Where(p => p.stock == 0).ToList();
             }
 
-            // Сначала применяем сортировку по дате (если указана)
             if (!string.IsNullOrEmpty(sort_by_date))
             {
                 if (sort_by_date.ToLower() == "desc")
@@ -135,7 +130,6 @@ namespace _8_practice_super_duper_max.Service
                 }
             }
 
-            // Затем применяем сортировку по цене (если указана)
             if (!string.IsNullOrEmpty(sort_by_price))
             {
                 if (sort_by_price.ToLower() == "desc")
@@ -148,7 +142,6 @@ namespace _8_practice_super_duper_max.Service
                 }
             }
 
-            // Если не указана ни одна сортировка, сортируем по имени по умолчанию
             if (string.IsNullOrEmpty(sort_by_date) && string.IsNullOrEmpty(sort_by_price))
             {
                 products = products.OrderBy(p => p.product_name).ToList();
@@ -169,7 +162,6 @@ namespace _8_practice_super_duper_max.Service
                 status = true
             });
         }
-
 
         // добавление нового продукта
         public async Task<IActionResult> PostNewProductAsync(PostNewProduct postNewPoduct)
@@ -252,7 +244,15 @@ namespace _8_practice_super_duper_max.Service
                 category_id = postNewPoduct.category_id
             };
 
+            var log = new LogUserAction()
+            {
+                created_at = DateTime.Now,
+                user_id = postNewPoduct.user_id,
+                action_type_id = 12 // PRODUCT_CREATED
+            };
+
             await _context.AddAsync(product);
+            await _context.AddAsync(log);
             await _context.SaveChangesAsync();
 
             return new OkObjectResult(new
@@ -347,11 +347,36 @@ namespace _8_practice_super_duper_max.Service
             existingProduct.is_active = putProduct.is_active;
             existingProduct.category_id = putProduct.category_id;
 
+            var log = new LogUserAction()
+            {
+                created_at = DateTime.Now,
+                user_id = putProduct.user_id,
+                action_type_id = 13 // PRODUCT_UPDATED
+            };
+            await _context.AddAsync(log);
             await _context.SaveChangesAsync();
 
             return new OkObjectResult(new
             {
                 status = true
+            });
+        }
+
+        // топ 10 товаров
+        public async Task<IActionResult> Top10ProductsAsync()
+        {
+            var topProducts = await _context.BasketItems.Include(bi => bi.Product).Include(bi => bi.Basket.Order).Where(bi => bi.Basket.Order.status_id == 4).GroupBy(bi => bi.Product.product_name)
+            .Select(g => new
+            {
+                ProductName = g.Key,
+                TimesSold = g.Count(),
+                TotalRevenue = g.Sum(bi => bi.Product.price)
+            }).OrderByDescending(p => p.TimesSold).ToListAsync();
+
+            return new OkObjectResult(new
+            {
+                status = true,
+                data = new { topProducts =  topProducts }
             });
         }
     }

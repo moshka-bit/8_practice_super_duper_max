@@ -15,7 +15,7 @@ namespace _8_practice_super_duper_max.Models
         public User User { get; set; }
 
         [ForeignKey("Order")]
-        public int order_id { get; set; }
+        public int? order_id { get; set; }
         public Order Order { get; set; }
     }
 }
