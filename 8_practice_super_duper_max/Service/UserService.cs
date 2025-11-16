@@ -583,6 +583,46 @@ namespace _8_practice_super_duper_max.Service
             });
         }
 
+        // изменение инфы о пользователе
+        public async Task<IActionResult> PutUserAsync(PutUser putUser)
+        {
+            if (string.IsNullOrEmpty(putUser.email))
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = false,
+                    message = "Почта не может быть пустой"
+                });
+            }
+
+            if (string.IsNullOrEmpty(putUser.address))
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = false,
+                    message = "Адрес не может быть пустым"
+                });
+            }
+
+            if (string.IsNullOrEmpty(putUser.phonenumber))
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = false,
+                    message = "Номер телефона не может быть пустым"
+                });
+            }
+
+            if (string.IsNullOrEmpty(putUser.password))
+            {
+                return new BadRequestObjectResult(new
+                {
+                    status = false,
+                    message = "Пароль не может быть пустым"
+                });
+            }
+        }
+
         // изменение роли пользователя
         public async Task<IActionResult> PutUserRoleAsync(int id, PutUserRole putUserRole)
         {
